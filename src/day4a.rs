@@ -1,19 +1,5 @@
 use std::io;
 
-const MAX : [i32;6] = [9;6];
-
-fn digits_from_num(num : i32) -> [i32;6] {
-    let mut num = num;
-    let mut digits : [i32;6] = [0;6];
-    let mut place = 5;
-    while num > 0 {
-        digits[place] = num % 10;
-        place -= 1;
-        num /= 10;
-    }
-    return digits;
-}
-
 fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, previous_digit : i32, place : i32, have_repeated : bool) -> i32 {
     let (max_here, max_rest) = max.map(|max_digits| (max_digits[0], Some(&max_digits[1..]))).unwrap_or((9, None));
     if place == 5 {
@@ -39,7 +25,7 @@ fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, pr
         if min_here == max_here {
             let current_digit = min_here;
             return count_combinations(number * 10 + current_digit, min_rest, max_rest, current_digit, place + 1, have_repeated || (current_digit == previous_digit));
-        } else if (min_here < max_here) {
+        } else if min_here < max_here {
             let mut count = 0;
             count += count_combinations(number * 10 + min_here, min_rest, None, min_here, place + 1, (place != 0 && min_here == previous_digit) ||have_repeated);
             if max_here - min_here > 1 {

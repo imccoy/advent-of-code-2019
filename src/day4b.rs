@@ -1,7 +1,5 @@
 use std::io;
 
-const MAX : [i32;6] = [9;6];
-
 #[derive(PartialEq, Copy, Clone, Debug)]
 enum Repeated { NotStarted, One, Two, Golden, Gone }
 
@@ -25,18 +23,6 @@ fn repeating_digit(repeated : Repeated, previous_digit : i32, new_digit : i32) -
                    Repeated::One
                }
     }
-}
-
-fn digits_from_num(num : i32) -> [i32;6] {
-    let mut num = num;
-    let mut digits : [i32;6] = [0;6];
-    let mut place = 5;
-    while num > 0 {
-        digits[place] = num % 10;
-        place -= 1;
-        num /= 10;
-    }
-    return digits;
 }
 
 fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, previous_digit : i32, place : i32, repeated : Repeated) -> i32 {
@@ -73,7 +59,7 @@ fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, pr
         if min_here == max_here {
            let current_digit = min_here;
            return count_combinations(number * 10 + current_digit, min_rest, max_rest, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
-        } else if (min_here < max_here) {
+        } else if min_here < max_here {
             let mut count = 0;
             count += count_combinations(number * 10 + min_here, min_rest, None, min_here, place + 1, repeating_digit(repeated, previous_digit, min_here));
             if max_here - min_here > 1 {
