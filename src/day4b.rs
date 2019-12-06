@@ -59,37 +59,27 @@ fn count_combinations(number : i32, min: &[i32], max: &[i32], previous_digit : i
             return 0;
         }
     } else {
-        println!("{} <= n <= {}", min[0], max[0]);
-        if min[0] == max[0] {
-            let current_digit = min[0];
-            return count_combinations(number * 10 + current_digit, &min[1..], &max[1..], current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
-        } else {
-            if (previous_digit == max[0]) {
-                let current_digit = max[0];
-                return count_combinations(number * 10 + current_digit, &MIN, &max[1..], current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
-            } else if (min[0] >= previous_digit) {
-                let mut count = 0;
-                count += count_combinations(number * 10 + min[0], &min[1..], &MAX, min[0], place + 1, repeating_digit(repeated, previous_digit, min[0]));
-                if max[0] - min[0] > 1 {
-                    for current_digit in (min[0]+1)..max[0] {
-                        count += count_combinations(number * 10 + current_digit, &MIN, &MAX, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
-                    }
+        let (first_possible_digit, min_rest) = if min[0] >= previous_digit {
+                                                   (min[0], &min[1..])
+                                               } else {
+                                                   (previous_digit, &MIN[0..])
+                                               };
+          
+        if first_possible_digit == max[0] {
+           let current_digit = first_possible_digit;
+           return count_combinations(number * 10 + current_digit, min_rest, &max[1..], current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
+        } else if (first_possible_digit < max[0]) {
+            let mut count = 0;
+            count += count_combinations(number * 10 + first_possible_digit, min_rest, &MAX, first_possible_digit, place + 1, repeating_digit(repeated, previous_digit, first_possible_digit));
+            if max[0] - first_possible_digit > 1 {
+                for current_digit in (first_possible_digit+1)..max[0] {
+                    count += count_combinations(number * 10 + current_digit, &MIN, &MAX, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
                 }
-                count += count_combinations(number * 10 + max[0], &MIN, &max[1..], max[0], place + 1, repeating_digit(repeated, previous_digit, max[0]));
-                return count;
-            } else if (previous_digit < max[0]) {
-                let mut count = 0;
-                count += count_combinations(number * 10 + previous_digit, &MIN, &MAX, previous_digit, place + 1, repeating_digit(repeated, previous_digit, previous_digit));
-                if max[0] - previous_digit > 1 {
-                    for current_digit in (previous_digit+1)..max[0] {
-                        count += count_combinations(number * 10 + current_digit, &MIN, &MAX, current_digit, place + 1, repeating_digit(repeated, previous_digit ,current_digit));
-                    }
-                }
-                count += count_combinations(number * 10 + max[0], &MIN, &max[1..], max[0], place + 1, repeating_digit(repeated, previous_digit, max[0]));
-                return count;
-            } else {
-                return 0;
             }
+            count += count_combinations(number * 10 + max[0], &MIN, &max[1..], max[0], place + 1, repeating_digit(repeated, previous_digit, max[0]));
+            return count;
+        } else {
+            return 0;
         }
     }
 }
