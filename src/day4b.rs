@@ -59,7 +59,7 @@ fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, pr
             return 0;
         }
     } else {
-        let (first_possible_digit, min_rest) = min
+        let (min_here, min_rest) = min
             .and_then(|min_digits| {
                 if min_digits[0] >= previous_digit {
                     Some ((min_digits[0], Some(&min_digits[1..])))
@@ -70,14 +70,14 @@ fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, pr
 
 
           
-        if first_possible_digit == max_here {
-           let current_digit = first_possible_digit;
+        if min_here == max_here {
+           let current_digit = min_here;
            return count_combinations(number * 10 + current_digit, min_rest, max_rest, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
-        } else if (first_possible_digit < max_here) {
+        } else if (min_here < max_here) {
             let mut count = 0;
-            count += count_combinations(number * 10 + first_possible_digit, min_rest, None, first_possible_digit, place + 1, repeating_digit(repeated, previous_digit, first_possible_digit));
-            if max_here - first_possible_digit > 1 {
-                for current_digit in (first_possible_digit+1)..max_here {
+            count += count_combinations(number * 10 + min_here, min_rest, None, min_here, place + 1, repeating_digit(repeated, previous_digit, min_here));
+            if max_here - min_here > 1 {
+                for current_digit in (min_here+1)..max_here {
                     count += count_combinations(number * 10 + current_digit, None, None, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
                 }
             }
