@@ -1,6 +1,5 @@
 use std::io;
 
-const MIN : [i32;6] = [0;6];
 const MAX : [i32;6] = [9;6];
 
 fn digits_from_num(num : i32) -> [i32;6] {
@@ -15,7 +14,7 @@ fn digits_from_num(num : i32) -> [i32;6] {
     return digits;
 }
 
-fn count_combinations(number : i32, min: &[i32], max: &[i32], previous_digit : i32, place : i32, have_repeated : bool) -> i32 {
+fn count_combinations(number : i32, min: Option<&[i32]>, max: &[i32], previous_digit : i32, place : i32, have_repeated : bool) -> i32 {
     if place == 5 {
         // if we're in the last position, and we haven't repeated a digit yet, we'll have to repeat the previous digit.
         // but if we've already covered the repeat-a-digit requirement, we'll have a bunch of options here
@@ -27,11 +26,7 @@ fn count_combinations(number : i32, min: &[i32], max: &[i32], previous_digit : i
             return 1;
         }
     } else {
-        let (first_possible_digit, min_rest) = if min[0] >= previous_digit {
-                                                   (min[0], &min[1..])
-                                               } else {
-                                                   (previous_digit, &MIN[0..])
-                                               };
+        let (first_possible_digit, min_rest) = min.map(|digits| => (digits[0], Some(&digits[1..]))).with_default((previous_digit, None))
         if first_possible_digit == max[0] {
             let current_digit = first_possible_digit;
             return count_combinations(number * 10 + current_digit, min_rest, &max[1..], current_digit, place + 1, have_repeated || (current_digit == previous_digit));
