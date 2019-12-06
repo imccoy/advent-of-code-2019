@@ -32,7 +32,10 @@ fn count_combinations(number : i32, min: &[i32], max: &[i32], previous_digit : i
             let current_digit = min[0];
             return count_combinations(number * 10 + current_digit, &min[1..], &max[1..], current_digit, place + 1, have_repeated || (current_digit == previous_digit));
         } else {
-            if (min[0] >= previous_digit) {
+            if (previous_digit == max[0]) {
+                let current_digit = max[0];
+                return count_combinations(number * 10 + current_digit, &MIN, &max[1..], current_digit, place + 1, have_repeated || (current_digit == previous_digit));
+            } else if (min[0] >= previous_digit) {
                 let mut count = 0;
                 count += count_combinations(number * 10 + min[0], &min[1..], &MAX, min[0], place + 1, (place != 0 && min[0] == previous_digit) || have_repeated);
                 if max[0] - min[0] > 1 {
@@ -52,9 +55,6 @@ fn count_combinations(number : i32, min: &[i32], max: &[i32], previous_digit : i
                 }
                 count += count_combinations(number * 10 + max[0], &MIN, &max[1..], max[0], place + 1, (place != 0 && max[0] == previous_digit) || have_repeated);
                 return count;
-            } else if (previous_digit == max[0]) {
-                let current_digit = max[0];
-                return count_combinations(number * 10 + current_digit, &MIN, &max[1..], current_digit, place + 1, have_repeated || (current_digit == previous_digit));
             } else {
                 return 0;
             }
