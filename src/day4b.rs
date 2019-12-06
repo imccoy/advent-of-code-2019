@@ -39,16 +39,17 @@ fn digits_from_num(num : i32) -> [i32;6] {
     return digits;
 }
 
-fn count_combinations(number : i32, min: Option<&[i32]>, max: &[i32], previous_digit : i32, place : i32, repeated : Repeated) -> i32 {
+fn count_combinations(number : i32, min: Option<&[i32]>, max: Option<&[i32]>, previous_digit : i32, place : i32, repeated : Repeated) -> i32 {
+    let (max_here, max_rest) = max.map(|max_digits| (max_digits[0], Some(&max_digits[1..]))).unwrap_or((9, None));
     if place == 5 {
         // if we're in the last position, and we haven't repeated a digit yet, we'll have to repeat the previous digit.
         // but if we've already covered the repeat-a-digit requirement, we'll have a bunch of options here
         if repeated == Repeated::Golden {
-            println!("{}x ({}) Golden", number, max[0] - previous_digit + 1);
-            return max[0] - previous_digit + 1;
+            println!("{}x ({}) Golden", number, max_here - previous_digit + 1);
+            return max_here - previous_digit + 1;
         } else if repeated == Repeated::Two {
-            println!("{}x ({}) Two", number, max[0] - previous_digit);
-            return max[0] - previous_digit;
+            println!("{}x ({}) Two", number, max_here - previous_digit);
+            return max_here - previous_digit;
         } else if repeated == Repeated::One {
             println!("{}{}", number, previous_digit);
             return 1;
@@ -69,18 +70,18 @@ fn count_combinations(number : i32, min: Option<&[i32]>, max: &[i32], previous_d
 
 
           
-        if first_possible_digit == max[0] {
+        if first_possible_digit == max_here {
            let current_digit = first_possible_digit;
-           return count_combinations(number * 10 + current_digit, min_rest, &max[1..], current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
-        } else if (first_possible_digit < max[0]) {
+           return count_combinations(number * 10 + current_digit, min_rest, max_rest, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
+        } else if (first_possible_digit < max_here) {
             let mut count = 0;
-            count += count_combinations(number * 10 + first_possible_digit, min_rest, &MAX, first_possible_digit, place + 1, repeating_digit(repeated, previous_digit, first_possible_digit));
-            if max[0] - first_possible_digit > 1 {
-                for current_digit in (first_possible_digit+1)..max[0] {
-                    count += count_combinations(number * 10 + current_digit, None, &MAX, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
+            count += count_combinations(number * 10 + first_possible_digit, min_rest, None, first_possible_digit, place + 1, repeating_digit(repeated, previous_digit, first_possible_digit));
+            if max_here - first_possible_digit > 1 {
+                for current_digit in (first_possible_digit+1)..max_here {
+                    count += count_combinations(number * 10 + current_digit, None, None, current_digit, place + 1, repeating_digit(repeated, previous_digit, current_digit));
                 }
             }
-            count += count_combinations(number * 10 + max[0], None, &max[1..], max[0], place + 1, repeating_digit(repeated, previous_digit, max[0]));
+            count += count_combinations(number * 10 + max_here, None, max_rest, max_here, place + 1, repeating_digit(repeated, previous_digit, max_here));
             return count;
         } else {
             return 0;
@@ -89,6 +90,6 @@ fn count_combinations(number : i32, min: Option<&[i32]>, max: &[i32], previous_d
 }
 
 fn main() -> io::Result<()> {
-    println!("{}", count_combinations(0, Some(&[1,3,7,6,8,3]), &[5,9,6,2,5,3], 0, 0, Repeated::NotStarted));
+    println!("{}", count_combinations(0, Some(&[1,3,7,6,8,3]), Some(&[5,9,6,2,5,3]), 0, 0, Repeated::NotStarted));
     Ok(())
 }
