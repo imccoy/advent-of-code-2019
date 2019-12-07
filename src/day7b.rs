@@ -192,35 +192,35 @@ fn run_line(program: &Vec<i32>, instruction: Instruction) -> Result<Command, Str
     }
 }
 
-fn run_program(program: &mut Vec<i32>, pc : usize, mut inputs: std::slice::Iter<i32>) -> Result<Option<(usize, i32)>, String> 
+struct Machine {
+    program: Vec<i32>,
+    pc: usize
+}
+
+fn run_program(machine : &mut Machine, mut inputs: std::slice::Iter<i32>) -> Result<Option<i32>, String> 
 {
-    let mut pc = pc;
     loop {
-        let (instruction, instruction_length) = parse_instruction(&program, pc)?;
-        let command = run_line(&program, instruction)?;
-        let pc_increment = match command {
-            Command::Jump(_) => 0,
-            _ => instruction_length + 1
-        };
+        let (instruction, instruction_length) = parse_instruction(&machine.program, machine.pc)?;
+        let command = run_line(&machine.program, instruction)?;
+        machine.pc += instruction_length + 1; // jump instructions will overwrite this
         match command {
             Command::Put(put) => {
-                program[put.address] = put.value;
+                machine.program[put.address] = put.value;
             },
             Command::Print(print) => {
-                return Ok(Some((pc + pc_increment, print.value)));
+                return Ok(Some(print.value));
             },
             Command::Read(read) => {
-                program[read.address] = *inputs.next().unwrap();
+                machine.program[read.address] = *inputs.next().unwrap();
             },
             Command::Jump(jump) => { 
-                pc = jump.target;
+                machine.pc = jump.target;
             },
             Command::Noop => { 
                 // do nothing
             },
             Command::Halt => return Ok(None)
         }
-        pc += pc_increment;
     }
 }
 
@@ -254,22 +254,23 @@ fn main() -> io::Result<()> {
         .collect();
     let settings = [-1;5];
     println!("{:?}", explore(settings, 0, &|settings : [i32;5]| {
-        let mut programs = [program.clone(), program.clone(), program.clone(), program.clone(), program.clone()];
-        let mut pcs : [usize;5] = [0;5];
+        let mut machines = [
+            Machine { program: program.clone(), pc: 0 },
+            Machine { program: program.clone(), pc: 0 },
+            Machine { program: program.clone(), pc: 0 },
+            Machine { program: program.clone(), pc: 0 },
+            Machine { program: program.clone(), pc: 0 }
+        ];
         let mut output = 0;
-        dbg!(settings);
         for program_index in 0..5 {
-            let (new_pc, next_output) = run_program(&mut programs[program_index], pcs[program_index], [settings[program_index] + 5, output].iter())?.unwrap();
+            let next_output = run_program(&mut machines[program_index], [settings[program_index] + 5, output].iter())?.unwrap();
             output = next_output;
-            pcs[program_index] = new_pc;
         }
-        let mut program_index = 0;
         loop {
             for program_index in 0..5 {
-                match run_program(&mut programs[program_index], pcs[program_index], [output].iter())? {
-                    Some((new_pc, next_output)) => {
+                match run_program(&mut machines[program_index], [output].iter())? {
+                    Some(next_output) => {
                         output = next_output;
-                        pcs[program_index] = new_pc;
                     },
                     None => {
                         return Ok(output);
