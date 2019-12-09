@@ -267,7 +267,7 @@ fn main() -> io::Result<()> {
         .collect();
     let mut machine = Machine { program: program.clone(), pc: 0, relative_base: 0 };
     loop {
-        match run_program(&mut machine, [].iter()) {
+        match run_program(&mut machine, [2].iter()) {
             Ok(Some(output)) => println!("{}", output),
             Err(message) => println!("I failed {}", message),
             Ok(None) => break
