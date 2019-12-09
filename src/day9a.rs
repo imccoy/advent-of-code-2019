@@ -7,7 +7,7 @@ struct ReadDetails {
 
 #[derive(Debug)]
 struct PrintDetails {
-    value: i32
+    value: i64
 }
 
 #[derive(Debug)]
@@ -18,7 +18,7 @@ struct JumpDetails {
 #[derive(Debug)]
 struct PutDetails {
     address: usize,
-    value: i32
+    value: i64
 }
 
 #[derive(Debug)]
@@ -30,9 +30,9 @@ struct SetRelativeBaseDetails {
 enum Command { Put(PutDetails), Read(ReadDetails), Print(PrintDetails), Jump(JumpDetails), SetRelativeBase(SetRelativeBaseDetails), Noop, Halt }
 
 enum Operand {
-  Immediate(i32),
+  Immediate(i64),
   Position(usize),
-  Relative(i32)
+  Relative(i64)
 }
 
 struct BinResultOp { op1 : Operand, op2 : Operand, result : Operand }
@@ -52,7 +52,7 @@ enum Instruction {
     Halt
 }
 
-fn operand_for_mode(mode : i32, value : i32) -> Result<Operand, String> {
+fn operand_for_mode(mode : i64, value : i64) -> Result<Operand, String> {
     if mode == 0 {
         Ok(Operand::Position(value as usize))
     } else if mode == 1 {
@@ -65,7 +65,7 @@ fn operand_for_mode(mode : i32, value : i32) -> Result<Operand, String> {
 }
 
 
-fn parse_bin_op(program: &Vec<i32>, pc : usize, modes : i32) -> Result<BinOp, String> {
+fn parse_bin_op(program: &Vec<i64>, pc : usize, modes : i64) -> Result<BinOp, String> {
     let mode1 = modes % 10;
     let mode2 = (modes / 10) % 10;
     Ok(BinOp {
@@ -75,7 +75,7 @@ fn parse_bin_op(program: &Vec<i32>, pc : usize, modes : i32) -> Result<BinOp, St
 }
 
 
-fn parse_bin_result_op(program: &Vec<i32>, pc : usize, modes : i32) -> Result<BinResultOp, String> {
+fn parse_bin_result_op(program: &Vec<i64>, pc : usize, modes : i64) -> Result<BinResultOp, String> {
     let mode1 = modes % 10;
     let mode2 = (modes / 10) % 10;
     let mode3 = (modes / 100) % 10;
@@ -86,14 +86,14 @@ fn parse_bin_result_op(program: &Vec<i32>, pc : usize, modes : i32) -> Result<Bi
     })
 }
 
-fn parse_un_op(program: &Vec<i32>, pc : usize, modes : i32) -> Result<UnOp, String> {
+fn parse_un_op(program: &Vec<i64>, pc : usize, modes : i64) -> Result<UnOp, String> {
     let mode = modes % 10;
     Ok(UnOp {
       op: operand_for_mode(mode, program[pc + 1])?
     })
 }
 
-fn parse_instruction(program: &Vec<i32>, pc : usize) -> Result<(Instruction, usize), String> {
+fn parse_instruction(program: &Vec<i64>, pc : usize) -> Result<(Instruction, usize), String> {
     let opcode = program[pc] % 100;
     let modes = program[pc] / 100;
 
@@ -122,25 +122,25 @@ fn parse_instruction(program: &Vec<i32>, pc : usize) -> Result<(Instruction, usi
     }
 }
 
-fn read_from_position(machine: &Machine, position: usize) -> i32 {
+fn read_from_position(machine: &Machine, position: usize) -> i64 {
    if position >= machine.program.len() {
        return 0;
    }
    return machine.program[position];
 }
 
-fn write_to_position(machine: &mut Machine, position: usize, value: i32) {
+fn write_to_position(machine: &mut Machine, position: usize, value: i64) {
    while position > machine.program.len() {
        machine.program.resize(machine.program.len() * 2, 0);
    }
    machine.program[position] = value;
 }
 
-fn resolve_op(machine: &Machine, op : Operand) -> i32 {
+fn resolve_op(machine: &Machine, op : Operand) -> i64 {
     match op {
         Operand::Immediate(value) => value,
         Operand::Position(position) => read_from_position(machine, position),
-        Operand::Relative(relative) => read_from_position(machine,((machine.relative_base as i32) + relative) as usize)
+        Operand::Relative(relative) => read_from_position(machine,((machine.relative_base as i64) + relative) as usize)
     }
 }
 
@@ -148,12 +148,12 @@ fn resolve_op_position(machine: &Machine, op : Operand) -> Result<usize, String>
     match op {
         Operand::Immediate(value) => Err(format!("got Immediate operand {}", value)),
         Operand::Position(position) => Ok(position),
-        Operand::Relative(relative) => Ok(((machine.relative_base as i32) + relative) as usize)
+        Operand::Relative(relative) => Ok(((machine.relative_base as i64) + relative) as usize)
     }
 }
 
 fn run_bin_result_op<F>(machine: &Machine, operands: BinResultOp, op: F) -> Result<Command, String> 
-    where F: Fn(i32, i32) -> i32
+    where F: Fn(i64, i64) -> i64
 {
     let op1 = resolve_op(machine, operands.op1);
     let op2 = resolve_op(machine, operands.op2);
@@ -215,7 +215,7 @@ fn run_line(machine: &Machine, instruction: Instruction) -> Result<Command, Stri
         },
         Instruction::AdjustRelativeBase(operands) => {
             let op = resolve_op(machine, operands.op);
-            Ok(Command::SetRelativeBase(SetRelativeBaseDetails { address: ((machine.relative_base as i32 + op) as usize) }))
+            Ok(Command::SetRelativeBase(SetRelativeBaseDetails { address: ((machine.relative_base as i64 + op) as usize) }))
         },
         Instruction::Halt => {
             Ok(Command::Halt)
@@ -224,12 +224,12 @@ fn run_line(machine: &Machine, instruction: Instruction) -> Result<Command, Stri
 }
 
 struct Machine {
-    program: Vec<i32>,
+    program: Vec<i64>,
     pc: usize,
     relative_base: usize
 }
 
-fn run_program(machine : &mut Machine, mut inputs: std::slice::Iter<i32>) -> Result<Option<i32>, String> 
+fn run_program(machine : &mut Machine, mut inputs: std::slice::Iter<i64>) -> Result<Option<i64>, String> 
 {
     loop {
         let (instruction, instruction_length) = parse_instruction(&machine.program, machine.pc)?;
@@ -261,9 +261,9 @@ fn run_program(machine : &mut Machine, mut inputs: std::slice::Iter<i32>) -> Res
 
 fn main() -> io::Result<()> {
     let program_string = io::stdin().lock().lines().next().unwrap()?;
-    let program : Vec<i32> = program_string.split(',')
+    let program : Vec<i64> = program_string.split(',')
         .filter(|line| line.len() != 0)
-        .map(|line| line.parse::<i32>().unwrap())
+        .map(|line| line.parse::<i64>().unwrap())
         .collect();
     let mut machine = Machine { program: program.clone(), pc: 0, relative_base: 0 };
     loop {
