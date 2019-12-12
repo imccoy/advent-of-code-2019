@@ -73,84 +73,11 @@ fn draw_painting(painting: Painting) -> io::Result<()> {
 
     for y in ymin..=ymax {
         for x in xmin..=xmax {
-            let colour = painting.get(&(x, y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
+            let colour = painting.get(&(x, y)).unwrap_or(&Colour::Black);
+            io::stdout().write(match colour { Colour::Black => b" ", Colour::White => b"#" })?;
         }
         io::stdout().write(b"\n")?;
     }
-    io::stdout().write(b"\n\n")?;
-
-
-    for y in ymin..=ymax {
-        for x in xmin..=xmax {
-            let colour = painting.get(&(xmax - x, y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"\n")?;
-    }
-    io::stdout().write(b"\n\n")?;
-
-    for y in ymin..=ymax {
-        for x in xmin..=xmax {
-            let colour = painting.get(&(x, ymax - y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"\n")?;
-    }
-    io::stdout().write(b"\n\n")?;
-
-    for y in ymin..=ymax {
-        for x in xmin..=xmax {
-            let colour = painting.get(&(xmax - x, ymax - y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"\n")?;
-    }
-    io::stdout().write(b"\n\n")?;
-
-    for x in xmin..=xmax {
-        for y in ymin..=ymax {
-            let colour = painting.get(&(x, y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"   ")?;
-
-        for y in ymin..=ymax {
-            let colour = painting.get(&(x, ymax - y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"   ")?;
-
-        for y in ymin..=ymax {
-            let colour = painting.get(&(xmax - x, y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"   ")?;
-
-        for y in ymin..=ymax {
-            let colour = painting.get(&(xmax - x, ymax - y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"   ")?;
-
-        io::stdout().write(b"\n")?;
-    }
-    io::stdout().write(b"\n\n")?;
-
-    for x in xmin..=xmax {
-        for _ in 0..(xmax - x) {
-            io::stdout().write(b" ")?;
-        }
-        for y in ymin..=ymax {
-            let colour = painting.get(&(x, y)).unwrap_or(&Colour::White);
-            io::stdout().write(match colour { Colour::Black => b"#", Colour::White => b" " })?;
-        }
-        io::stdout().write(b"\n")?;
-    }
-    io::stdout().write(b"\n\n")?;
-
-
-
     Ok(())
 }
 
