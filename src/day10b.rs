@@ -62,25 +62,11 @@ fn station_relative((x, y) : (i32, i32)) -> (i32, i32) {
 
 fn scan_order((angle_x, angle_y): (i32, i32)) -> f64 {
     let (float_angle_x, float_angle_y) : (f64, f64) = (angle_x.into(), angle_y.into());
-    let angle : f64 = (float_angle_y / float_angle_x).atan();
-    if angle_x > 0 {
-        if angle_y < 0 {
-            return 10.0 + angle; // add 10 to make sure all results are positive while preserving the order
-        } else {
-            return 20.0 + angle; // add 10 to make sure all results are positive while preserving the order
-        }
-    } else if angle_x < 0 {
-        if angle_y < 0 {
-            return 40.0 + angle; // add 10 to make sure all results are positive while preserving the order
-        } else {
-            return 30.0 + angle; // add 10 to make sure all results are positive while preserving the order
-        }
+    let angle : f64 = float_angle_y.atan2(float_angle_x) + std::f64::consts::FRAC_PI_2;
+    if angle > 0.0 {
+        return angle;
     } else {
-        if angle_y < 0 {
-            return 5.0; // add 10 to make sure all results are positive while preserving the order
-        } else {
-            return 25.0; // add 10 to make sure all results are positive while preserving the order
-        }
+        return angle + std::f64::consts::PI * 2.0;
     }
 }
 
