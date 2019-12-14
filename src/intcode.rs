@@ -227,7 +227,8 @@ pub struct Machine {
     pub relative_base: usize
 }
 
-pub fn run_program(machine : &mut Machine, mut inputs: std::slice::Iter<i64>) -> Result<Option<i64>, String> 
+pub fn run_program<'a, T>(machine : &mut Machine, mut inputs: T) -> Result<Option<i64>, String> 
+  where T: Iterator<Item = &'a i64>
 {
     loop {
         let (instruction, instruction_length) = parse_instruction(&machine.program, machine.pc)?;
