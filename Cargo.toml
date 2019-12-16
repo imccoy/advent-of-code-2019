@@ -106,6 +106,10 @@ path = "src/day13b.rs"
 name = "day14"
 path = "src/day14.rs"
 
+[[bin]]
+name = "day16"
+path = "src/day16.rs"
+
 [dependencies]
 num = "0.2.0" 
 num-traits = "0.2"
