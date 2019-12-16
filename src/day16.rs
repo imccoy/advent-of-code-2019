@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::cmp::min;
 use std::io::{self,BufRead};
 
 
@@ -51,15 +52,28 @@ fn main() -> io::Result<()> {
       .map(|char| char.to_digit(10))
       .filter_map(|maybe_digit| maybe_digit.and_then(|digit| i32::try_from(digit).ok()))
       .collect();
-    let mut digits : Vec<i32> = input_digits.iter().cycle().take(input_digits.len() * 1).map(|digit| *digit).collect();
+    let mut digits : Vec<i32> = input_digits.clone();
     println!("{:?}", digits.len());
     let base_pattern : [i32;4] = [0, 1, 0, -1];
-    for iter in (0..100) {
-        digits = (0..digits.len()).map(|place| {
-            let pattern = repeat_each(base_pattern.iter(), place + 1).cycle().skip(1);
+    for iter in 0..100 {
+        println!("{:?}", iter);
+        digits = (1..(digits.len()+1)).map(|pattern_reps| {
+            let positive_start : i32 = pattern_reps as i32;
+            let positive_end : i32 = (pattern_reps * 2) as i32;
+            let negative_start : i32 = (pattern_reps * 3) as i32;
+            let negative_end : i32 = (pattern_reps * 4) as i32;
+            let mut offset : i32 = -1;
             let mut n : i32 = 0;
-            for (digit, pattern_val) in digits.iter().zip(pattern) {
-                n += digit * pattern_val;
+            loop {
+                if offset + positive_start >= i32::try_from(digits.len()).unwrap() {
+                    break;
+                }
+                n += digits[usize::try_from(offset + positive_start).unwrap()..min(usize::try_from(offset + positive_end).unwrap(), digits.len())].iter().sum::<i32>();
+                if offset + negative_start >= i32::try_from(digits.len()).unwrap() {
+                    break;
+                }
+                n -= digits[usize::try_from(offset + negative_start).unwrap()..min(usize::try_from(offset + negative_end).unwrap(), digits.len())].iter().sum::<i32>();
+                offset += negative_end;
             }
             (n % 10).abs()
         }).collect();
