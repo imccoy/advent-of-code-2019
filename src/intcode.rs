@@ -128,7 +128,7 @@ fn read_from_position(machine: &Machine, position: usize) -> i64 {
 }
 
 fn write_to_position(machine: &mut Machine, position: usize, value: i64) {
-   while position > machine.program.len() {
+   while position >= machine.program.len() {
        machine.program.resize(machine.program.len() * 2, 0);
    }
    machine.program[position] = value;
